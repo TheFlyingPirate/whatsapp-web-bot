@@ -1,53 +1,35 @@
-(() => {
+ (() => {
 	//
 	// GLOBAL VARS AND CONFIGS
 	//
+	var antiAutoReply;
+	var prevSend;
 	var lastMessageOnChat = false;
 	var ignoreLastMsg = {};
 	var elementConfig = {
 		"chats": [0, 0, 5, 2, 0, 3, 0, 0, 0],
+		"pane-side": [0, 0, 5, 2, 0, 3, 0, 0, 0],
 		"chat_icons": [0, 0, 1, 1, 1, 0],
+		".xD91K": [0, 0, 1, 1, 1, 0],
 		"chat_title": [0, 0, 1, 0, 0, 0, 0],
 		"chat_lastmsg": [0, 0, 1, 1, 0, 0],
 		"chat_active": [0, 0],
 		"selected_title": [0, 0, 5, 3, 0, 1, 1, 0, 0, 0, 0]
 	};
-
-	const jokeList = [
-		`
-		Husband and Wife had a Fight.
-		Wife called Mom : He fought with me again,
-		I am coming to you.
-		Mom : No beta, he must pay for his mistake,
-		I am comming to stay with U!`,
-
-		`
-		Husband: Darling, years ago u had a figure like Coke bottle.
-		Wife: Yes darling I still do, only difference is earlier it was 300ml now it's 1.5 ltr.`,
-
-		`
-		God created the earth, 
-		God created the woods, 
-		God created you too, 
-		But then, even God makes mistakes sometimes!`,
-
-		`
-		What is a difference between a Kiss, a Car and a Monkey? 
-		A kiss is so dear, a car is too dear and a monkey is U dear.`
-	]
+	
+	
+	
+	const commandList = ["Command 1","Command 2"];//insert your own commands here
+	const replyList = ["Reply 1","Reply 2"]; //insert your replies here
+	const defaultReply = "Default Reply";//insert the default Reply here
 
 
 	//
 	// FUNCTIONS
 	//
-
-	// Get random value between a range
-	function rand(high, low = 0) {
-		return Math.floor(Math.random() * (high - low + 1) + low);
-	}
-	
 	function getElement(id, parent){
 		if (!elementConfig[id]){
+			//alert("Testa");
 			return false;
 		}
 		var elem = !parent ? document.body : parent;
@@ -62,16 +44,16 @@
 	}
 	
 	function getLastMsg(){
-		var messages = document.querySelectorAll('.msg');
+		var messages = document.querySelectorAll('.FTBzM');
+		//console.log(document.querySelectorAll('.FTBzM'));
 		var pos = messages.length-1;
-		
 		while (messages[pos] && (messages[pos].classList.contains('msg-system') || messages[pos].querySelector('.message-in'))){
 			pos--;
-			if (pos <= -1){
+			if (pos <= -1){ 
 				return false;
 			}
 		}
-		if (messages[pos] && messages[pos].querySelector('.selectable-text')){
+		if (messages[pos] && messages[pos].querySelector('.selectable-text')){	
 			return messages[pos].querySelector('.selectable-text').innerText.trim();
 		} else {
 			return false;
@@ -80,32 +62,34 @@
 	
 	function getUnreadChats(){
 		var unreadchats = [];
-		var chats = getElement("chats");
+		var chats = getElement("pane-side");
+		//alert(chats);
 		if (chats){
 			chats = chats.childNodes;
+			
 			for (var i in chats){
+				
 				if (!(chats[i] instanceof Element)){
 					continue;
 				}
-				var icons = getElement("chat_icons", chats[i]).childNodes;
-				if (!icons){
-					continue;
+				
+			
+				var classValue = "P6z4j";
+				var messageCount = chats[i].getElementsByClassName(classValue);
+				if (messageCount.length==1){
+					  unreadchats.push(chats[i]);
+					//  alert(chats[i].className);
 				}
-				for (var j in icons){
-					if (icons[j] instanceof Element){
-						if (!(icons[j].childNodes[0].getAttribute('data-icon') == 'muted' || icons[j].childNodes[0].getAttribute('data-icon') == 'pinned')){
-							unreadchats.push(chats[i]);
-							break;
-						}
-					}
-				}
+			
 			}
 		}
 		return unreadchats;
 	}
 	
 	function didYouSendLastMsg(){
-		var messages = document.querySelectorAll('.msg');
+
+		var messages = document.querySelectorAll('.FTBzM, .msg');
+
 		if (messages.length <= 0){
 			return false;
 		}
@@ -120,13 +104,19 @@
 		if (messages[pos].querySelector('.message-out')){
 			return true;
 		}
+		if (messages[pos].classList.contains('message-out')){
+			return true;
+			
+		}
+		
+		
 		return false;
 	}
 
 	// Call the main function again
 	const goAgain = (fn, sec) => {
-		// const chat = document.querySelector('div.chat:not(.unread)')
-		// selectChat(chat)
+		//const chat = document.querySelector('div.chat:not(.unread)')
+		//selectChat(chat)
 		setTimeout(fn, sec * 1000)
 	}
 
@@ -140,7 +130,8 @@
 	// Select a chat to show the main box
 	const selectChat = (chat, cb) => {
 		const title = getElement("chat_title",chat).title;
-		eventFire(chat.firstChild.firstChild, 'mousedown');
+		
+		eventFire(chat.firstChild.firstChild.firstChild, 'mousedown');
 		if (!cb) return;
 		const loopFewTimes = () => {
 			setTimeout(() => {
@@ -162,10 +153,11 @@
 		var title;
 
 		if (chat){
-			title = getElement("chat_title",chat).title;
+			title = getElement("chat_title").title;
 		} else {
-			title = getElement("selected_title").title;
+			title = document.getElementsByClassName("_19RFN")[0].innerHTML.replace(/[\u2000-\u206F]/g, "");
 		}
+		
 		ignoreLastMsg[title] = message;
 		
 		messageBox = document.querySelectorAll("[contenteditable='true']")[0];
@@ -196,12 +188,12 @@
 		var lastMsg;
 		
 		if (!lastMessageOnChat){
-			if (false === (lastMessageOnChat = getLastMsg())){
+			if (false == (lastMessageOnChat = getLastMsg())){
 				lastMessageOnChat = true; //to prevent the first "if" to go true everytime
 			} else {
 				lastMsg = lastMessageOnChat;
 			}
-		} else if (lastMessageOnChat != getLastMsg() && getLastMsg() !== false && !didYouSendLastMsg()){
+		} else if (lastMessageOnChat != getLastMsg() && getLastMsg() != false && !didYouSendLastMsg()){
 			lastMessageOnChat = lastMsg = getLastMsg();
 			processLastMsgOnChat = true;
 		}
@@ -212,42 +204,68 @@
 		}
 
 		// get infos
+try{ 	
+	selectChat(chat);
+}catch(err){}
 		var title;
 		if (!processLastMsgOnChat){
 			title = getElement("chat_title",chat).title + '';
 			lastMsg = (getElement("chat_lastmsg", chat) || { innerText: '' }).title.replace(/[\u2000-\u206F]/g, ""); //.last-msg returns null when some user is typing a message to me
+			
 		} else {
-			title = getElement("selected_title").title;
+			title = document.getElementsByClassName("_19RFN")[0].innerHTML.replace(/[\u2000-\u206F]/g, "");
 		}
+		
+		console.log('Cazooooooooo', title,lastMsg );
+		
 		// avoid sending duplicate messaegs
 		if (ignoreLastMsg[title] && (ignoreLastMsg[title]) == lastMsg) {
 			console.log(new Date(), 'nothing to do now... (2)', title, lastMsg);
-			return goAgain(() => { start(chats, cnt + 1) }, 0.1);
+			return goAgain(() => { start(chats, cnt + 1) }, 0.5);
 		}
-
+		if(lastMsg==replyList[0]){
+		lastMsg="";
+		}
 		// what to answer back?
 		let sendText
-
-		if (lastMsg.toUpperCase().indexOf('@HELP') > -1){
-			sendText = `
-				Cool ${title}! Some commands that you can send me:
-
-				1. *@TIME*
-				2. *@JOKE*`
+		
+		for(var i=0;i<commandList.length;i++){
+			if(lastMsg.toUpperCase() == commandList[i]){
+				sendText = replyList[i];
+			}
+			if(lastMsg==replyList[i]){
+				sendText = "";
+			}
+		
 		}
-
-		if (lastMsg.toUpperCase().indexOf('@TIME') > -1){
-			sendText = `
-				Don't you have a clock, dude?
-
-				*${new Date()}*`
+		
+		if(!sendText&&lastMsg!=""){
+		sendText = defaultReply;
 		}
-
-		if (lastMsg.toUpperCase().indexOf('@JOKE') > -1){
-			sendText = jokeList[rand(jokeList.length - 1)];
+		for(var i=0;i<commandList.length;i++){
+			if(lastMsg==replyList[i]){
+				sendText = "";
+			}
+		
+		}
+		if(lastMsg==defaultReply){
+			sendText = "";
 		}
 		
 		// that's sad, there's not to send back...
+	
+		if(prevSend==lastMsg){
+			sendText="";
+		}
+		
+		if(antiAutoReply==title +" "+lastMsg){
+				
+				sendText="";
+			
+		}
+	
+		antiAutoReply=title+ " " + lastMsg;
+		prevSend=sendText;
 		if (!sendText) {
 			ignoreLastMsg[title] = lastMsg;
 			console.log(new Date(), 'new message ignored -> ', title, lastMsg);
@@ -257,13 +275,16 @@
 		console.log(new Date(), 'new message to process, uhull -> ', title, lastMsg);
 
 		// select chat and send message
+		
 		if (!processLastMsgOnChat){
-			selectChat(chat, () => {
+			
+			selectChat(chat, () => {if(sendText!=false){
 				sendMessage(chat, sendText.trim(), () => {
 					goAgain(() => { start(chats, cnt + 1) }, 1);
 				});
-			})
+			}})
 		} else {
+			
 			sendMessage(null, sendText.trim(), () => {
 				goAgain(() => { start(chats, cnt + 1) }, 1);
 			});
